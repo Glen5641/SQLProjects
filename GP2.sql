@@ -1,3 +1,4 @@
+--Adding code to make sure git works clean
 --This code creates and populates the tables for Group Project 2
 
 DROP TABLE student;
