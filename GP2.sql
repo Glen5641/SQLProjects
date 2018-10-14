@@ -1,5 +1,12 @@
---Adding code to make sure git works clean
---This code creates and populates the tables for Group Project 2
+ /* This code creates tables and runs queries for problem 1 in gp3.
+ *  
+ *  In this problem, we chose author ID in the problem table. 
+ *  The table is well queried in the database and the author 
+ *  table's Author ID is the attribute used to find the index. 
+ *  Author ID in the problem table is secondary and problems 
+ *  5,7, and 9 all use the problem.aid so we chose to rerun these 
+ *  queries.
+ */
 
 DROP TABLE student;
 DROP TABLE contest;
@@ -18,9 +25,6 @@ CREATE TABLE student (
     
 )
 
-   CREATE INDEX index_name
-   ON student (login);
-
 INSERT INTO student 
     (login, sname, university, grad_year)
 VALUES
@@ -32,6 +36,8 @@ VALUES
     ('mightybruce', 'Bruce Yamashita', 'Texas A&M University', 2018),
     ('_ash_', 'Ashley Brzozowicz', 'University of Oklahoma', 2020),
     ('jose1980', 'Jose Monteiro', 'Texas Christian University', 2018);
+
+
 
 CREATE TABLE contest (
     cname VARCHAR(64) PRIMARY KEY,
@@ -100,6 +106,10 @@ VALUES
     (18, 'Watson''s Love for Arrays', 30, 102),
     (19, 'Dynamic Trees', 50, 102);
 
+--Created index on aid in Problem table
+CREATE INDEX aid_idx
+ON problem (aid);
+
 CREATE TABLE scored (
     pid INT,
     login VARCHAR(64),
@@ -130,6 +140,8 @@ VALUES
     (18, 'stefan', 27),
     (18, '_ash_', 18),
     (19, 'stefan', 41);
+
+
 
 CREATE TABLE contest_problems (
     cname VARCHAR(64),
@@ -162,19 +174,6 @@ SELECT * FROM problem
 SELECT * FROM scored
 SELECT * FROM contest_problems
 
--- Problem 2.c.2
-SELECT sname,grad_year FROM student WHERE university = 'University of Oklahoma'
-
--- Problem 2.c.3
-SELECT problem.pname, contest_problems.cname
-FROM contest_problems
-INNER JOIN problem ON problem.pid = contest_problems.pid;
-
--- Problem 2.c.4
-SELECT DISTINCT login, SUM(score) AS sum_scores
-FROM scored
-GROUP BY login
-
 -- Problem 2.c.5
 SELECT pname
 FROM problem
@@ -182,14 +181,6 @@ INNER JOIN author ON problem.aid = author.aid
 WHERE aname = 'Rachel Moran' AND
     max_score =(SELECT MAX(problem.max_score) FROM problem);
 
--- Problem 2.c.6
-SELECT pname 
-FROM (
-SELECT scored.pid, problem.pname, COUNT(login) AS num_stud
-FROM scored
-INNER JOIN problem ON problem.pid = scored.pid
-GROUP BY scored.pid, problem.pname
-HAVING COUNT(login) > 2 ) ptable
 
 -- Problem 2.c.7
 SELECT cname, SUM(author.compensation) AS comp_sum
@@ -199,19 +190,6 @@ FROM contest_problems
 INNER JOIN problem ON problem.pid = contest_problems.pid ) cproblems 
 INNER JOIN author ON author.aid = cproblems.aid
 GROUP BY cname
-
--- Problem 2.c.8
-SELECT cname , MAX(score_sum) AS highest_sum
-FROM (
-    SELECT cname, login , SUM(contest_scores.score) AS score_sum
-    FROM (
-            SELECT scored.pid, scored.login, scored.score, contest_problems.cname 
-            FROM scored 
-            FULL JOIN contest_problems ON scored.pid = contest_problems.pid) contest_scores
-    GROUP BY cname, login ) sumtable
-GROUP BY cname
-
-
 
 
 -- Problem 2.c.9
@@ -231,9 +209,3 @@ WHERE author.aid IN (
     WHERE ppercent > .5 AND ppercent <.75) 
 
 SELECT * FROM author
-
---2.c.10
-DELETE FROM student
-WHERE student.grad_year = '2018'
-
-SELECT * FROM student
